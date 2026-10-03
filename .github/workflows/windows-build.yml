@@ -1,10 +1,15 @@
 name: windows-build
 
+# Только ручной запуск: Actions -> windows-build -> Run workflow.
+# Тяжёлый Gecko-билд не должен срабатывать на каждый push.
 on:
-  push:
-    branches: [master, main]
-  pull_request:
   workflow_dispatch:
+    inputs:
+      clean:
+        description: "Сбросить engine/ и скачать Firefox заново (игнорировать кеш исходников)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -23,6 +28,12 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.4.2"
+      - name: Restore Bun cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
       - name: Install deps
         run: bun install --frozen-lockfile
       - name: Typecheck (TS 7.0.2)
@@ -30,12 +41,9 @@ jobs:
       - name: UI check
         run: bun run lint
 
-  # Полный билд Gecko — тяжёлый, кешируем engine/ и sccache
+  # Полный билд Gecko — только вручную. Кеши слоёные, см. комментарии.
   build-windows:
     needs: ui-check
-    # Чтобы не жечь минуты на каждый push: полный билд только вручную или по тегу.
-    # Убери if, если хочешь собирать на каждый push.
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     # windows-2022 зафиксирован намеренно: там VS2022, под который заточен
     # MozillaBuild + Firefox 157. windows-2025/latest уже на VS2026.
     runs-on: windows-2022
@@ -56,18 +64,45 @@ jobs:
       - name: Setup Rust (Firefox 157)
         uses: dtolnay/rust-toolchain@stable
 
+      # Главный кеш инкрементальной сборки: объектные файлы компилятора.
+      # Сам складывается в GHA cache, путь указывать не надо.
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.10
+
+      - name: Restore Bun cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      # Реестр cargo: ускоряет bootstrap и сборку Rust-частей движка.
+      - name: Restore Cargo registry cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-${{ runner.os }}-ff157-${{ hashFiles('surfer.json') }}
+          restore-keys: cargo-${{ runner.os }}-ff157-
+
+      # Исходники Firefox: кешируем engine/ без obj-*.
+      # Артефакты сборки (obj-*) туда осознанно не входят: они десятки ГБ,
+      # в лимит GHA cache (10GB) не влезут — их покрывает sccache выше.
+      - name: Restore Firefox source cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            engine
+            !engine/obj-*
+          key: ff-source-157-${{ hashFiles('surfer.json', 'build/firefox-cache/l10n-last-commit-hash') }}
 
       - name: Install JS deps
         run: bun install --frozen-lockfile
 
-      - name: Cache Firefox engine
-        uses: actions/cache@v5
-        with:
-          path: engine
-          key: firefox-157-${{ hashFiles('surfer.json', 'build/firefox-cache/l10n-last-commit-hash') }}
-          restore-keys: firefox-157-
+      - name: Reset engine (clean run)
+        if: inputs.clean == true
+        run: bun run reset-ff
 
       - name: Download + import
         run: bun run init

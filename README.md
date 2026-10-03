@@ -45,8 +45,18 @@ bun run reset-ff
 
 ## CI
 
-- `ui-check` — на каждый push/PR: Bun 1.4.2 + `tsc --noEmit` + `bun run lint`.
-- `build-windows` — полный Gecko-билд на `windows-2022`, только по тегу `v*` или вручную (иначе сожжёт все минуты + 30GB кеша).
+Воркфлоу `windows-build` запускается **только вручную**: Actions → windows-build → Run workflow.
+Опция `clean: true` сбрасывает `engine/` и качает Firefox заново.
+
+- `ui-check` — Bun 1.4.2 + `tsc --noEmit` + `bun run lint` (без движка).
+- `build-windows` — полный Gecko-билд на `windows-2022` (там VS2022 под Firefox 157).
+
+Кеш слоёный (первый прогон греет, дальше переиспользуется):
+
+- `sccache` — объектные файлы компилятора, главная экономия пересборок;
+- `ff-source-157-*` — исходники `engine/` без `obj-*` (артефакты сборки в лимит кеша 10GB не влезут);
+- `cargo-*` — реестр cargo для Rust-частей;
+- `bun-*` — JS-зависимости по `bun.lock`.
 
 Артефакт: `aer-browser-windows` (zip установщика из `engine/obj-*/dist/`).
 
