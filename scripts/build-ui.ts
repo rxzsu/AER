@@ -2,7 +2,7 @@
 // Запуск: bun scripts/build-ui.ts [--check]
 const root = import.meta.dir + "/..";
 
-const patches = ["src/zen/theme/aer-theme.css", "src/browser/base/content/browser-xhtml.patch"];
+const patches = ["src/zen/theme/aer-theme.css", "drafts/browser-xhtml.patch"];
 
 let failed = 0;
 for (const p of patches) {

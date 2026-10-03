@@ -43,7 +43,9 @@ if (!engineDirExists.includes("yes")) {
 void engineMarker;
 
 await copyIfExists("src/zen", "browser/components/aer");
-await copyIfExists("branding/aer", "browser/branding/aer");
+// НЕ копируем branding/aer: заглушка без иконок, а surfer build при виде
+// engine/browser/branding/aer перестал бы использовать unofficial и упал бы
+// на configure. Настоящий брендинг ляжет в configs/branding/aer/ позже.
 await copyIfExists("configs/common/mozconfig", "mozconfig-aer-common");
 await copyIfExists("configs/windows/mozconfig", ".mozconfig");
 

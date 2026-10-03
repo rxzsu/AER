@@ -1,10 +1,12 @@
 # Common mozconfig for AER Browser (inherits into platform configs)
 # See: https://firefox-source-docs.mozilla.org/setup/configuring_build_options.html
 
-# --- App identity (подставляется из surfer.json через surfer import) ---
+# --- App identity ---
+# ${brandingDir} подставляет surfer build: unofficial, пока нет своих иконок
+# в configs/branding/aer/ (см. surfer import). Остальное захардкожено под AER.
 ac_add_options --with-app-name=aer
 ac_add_options --with-app-basename=AER
-ac_add_options --with-branding=browser/branding/aer
+ac_add_options --with-branding=${brandingDir}
 ac_add_options --with-distribution-id=app.aer-browser
 ac_add_options --enable-application=browser
 
