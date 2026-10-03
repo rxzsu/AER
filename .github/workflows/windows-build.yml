@@ -104,6 +104,11 @@ jobs:
         if: inputs.clean == true
         run: bun run reset-ff
 
+      # Surfer делает `git add -f .` внутри engine/; дефолтный autocrlf=true
+      # на Windows-раннере топит лог тысячами варнингов и портит LF в исходниках.
+      - name: Force LF line endings for engine sources
+        run: git config --global core.autocrlf false
+
       - name: Download + import
         run: bun run init
         env:
