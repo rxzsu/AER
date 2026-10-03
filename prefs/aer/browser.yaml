@@ -1,0 +1,13 @@
+# AER default prefs — минимум, чтобы не конфликтовать с upstream.
+# Формат: YAML как у Zen (prefs -> firefox.js через import-скрипт).
+
+browser.tabs.vertical: true
+browser.tabs.groups.enabled: true
+aer.ui.compactMode: true
+aer.workspaces.enabled: false
+aer.theme.darkByDefault: true
+
+# Приватность из коробки (консервативно, не ломаем сайты)
+privacy.trackingprotection.enabled: true
+privacy.trackingprotection.pbmode.enabled: true
+network.cookie.cookieBehavior: 4

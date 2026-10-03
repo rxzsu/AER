@@ -1,0 +1,3 @@
+component {a0000000-0000-4000-a000-aer000000001} AerComponents.js
+contract @aer.browser/components;1 {a0000000-0000-4000-a000-aer000000001}
+category app-startup AerComponents @aer.browser/components;1

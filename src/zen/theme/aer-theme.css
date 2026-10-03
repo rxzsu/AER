@@ -1,0 +1,20 @@
+/* AER theme MVP — только CSS-переменные и фон, без глубоких переопределений.
+ * Так меньше конфликтов при bump Firefox ESR. */
+
+:root[aer-theme="dark"] {
+  --aer-bg: #1a1b26;
+  --aer-fg: #c0caf5;
+  --aer-accent: #7aa2f7;
+  --aer-radius: 10px;
+}
+
+#aer-main-app-wrapper {
+  background: var(--aer-bg, Canvas);
+  color: var(--aer-fg, CanvasText);
+}
+
+#aer-sidebar-container {
+  min-width: 48px;
+  background: color-mix(in srgb, var(--aer-bg) 92%, transparent);
+  border-inline-end: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}

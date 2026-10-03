@@ -1,0 +1,7 @@
+[install]
+# Bun-first: точные версии для воспроизводимого CI
+exact = false
+
+[run]
+# Чтобы `bun run build` и т.д. работали без npx-шима
+bun = true

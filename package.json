@@ -1,0 +1,34 @@
+{
+  "name": "aer-browser-desktop",
+  "version": "1.0.0-a1",
+  "private": true,
+  "description": "AER Browser — Gecko-based browser (Firefox fork, Zen model), Windows-only",
+  "license": "MPL-2.0",
+  "type": "module",
+  "packageManager": "bun@1.4.2",
+  "engines": {
+    "bun": "1.4.2"
+  },
+  "scripts": {
+    "init": "bun run download && bun run import && bun run bootstrap",
+    "download": "bunx @zen-browser/surfer download",
+    "import": "bunx @zen-browser/surfer import && bun scripts/import-aer.ts",
+    "bootstrap": "bunx @zen-browser/surfer bootstrap",
+    "build": "bunx @zen-browser/surfer build",
+    "build:ui": "bun scripts/build-ui.ts",
+    "package": "bunx @zen-browser/surfer package",
+    "ci": "bunx @zen-browser/surfer ci",
+    "reset-ff": "bunx @zen-browser/surfer reset",
+    "update-l10n": "bun scripts/update-l10n.ts",
+    "lint": "bun scripts/build-ui.ts --check",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@zen-browser/surfer": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prettier": "^3.3.3",
+    "typescript": "7.0.2"
+  }
+}

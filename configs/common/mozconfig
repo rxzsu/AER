@@ -1,0 +1,29 @@
+# Common mozconfig for AER Browser (inherits into platform configs)
+# See: https://firefox-source-docs.mozilla.org/setup/configuring_build_options.html
+
+# --- App identity (подставляется из surfer.json через surfer import) ---
+ac_add_options --with-app-name=aer
+ac_add_options --with-app-basename=AER
+ac_add_options --with-branding=browser/branding/aer
+ac_add_options --with-distribution-id=app.aer-browser
+ac_add_options --enable-application=browser
+
+# --- Caching ---
+ac_add_options --with-compiler-wrapper=sccache
+mk_add_options "export SCCACHE_IDLE_TIMEOUT=0"
+
+# --- Features we always want ---
+ac_add_options --enable-jxl
+ac_add_options --with-unsigned-addon-scopes=app,system
+export MOZ_REQUIRE_SIGNING=
+
+# --- Release tuning (включается когда ZEN_RELEASE/AER_RELEASE задан в CI) ---
+if [ -n "$AER_RELEASE" ]; then
+  ac_add_options --enable-optimize
+  ac_add_options --disable-debug
+  ac_add_options --disable-tests
+  ac_add_options --enable-rust-simd
+  ac_add_options --enable-wasm-simd
+  # thin LTO — компромисс скорость сборки / перфоманс для стартового CI
+  export MOZ_LTO=cross,thin
+fi

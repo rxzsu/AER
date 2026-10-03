@@ -1,0 +1,21 @@
+# Windows-only mozconfig for AER Browser
+# Локальная сборка: MozillaBuild + VS 2022 + Rust. CI: windows-2022 image.
+
+. "$topsrcdir/configs/common/mozconfig"
+
+# --- Windows toolchain ---
+# MozillaBuild сам выставляет пути к MSVC; здесь только наши опции.
+ac_add_options --target=x86_64-pc-mingw32
+ac_add_options --host=x86_64-pc-mingw32
+
+# Отключаем тесты и крашрепорт-символы для ускорения первого билда
+ac_add_options --disable-debug-symbols
+
+# PGO: включаем только в релизном CI, использует cross-профиль из артефактов
+# Чтобы выключить: AER_DISABLE_PGO=1
+if [ -n "$AER_RELEASE" ] && [ -z "$AER_DISABLE_PGO" ]; then
+  ac_add_options --enable-profile-generate=cross
+fi
+
+# Параллелизм: mach сам подхватит ядра, явно ничего не форсим
+mk_add_options MOZ_MAKE_FLAGS=-j$NUMBER_OF_PROCESSORS

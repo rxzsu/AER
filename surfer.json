@@ -1,0 +1,17 @@
+{
+  // AER Browser — конфиг трекинга upstream Firefox (модель Zen / Surfer)
+  // Поле candidate = версия Firefox, поверх которой накатываем патчи
+  "export": {
+    "version": "1.0.0-a1",
+    "candidate": "157.0",
+    "channel": "nightly",
+    "copyright": "AER Contributors",
+    "binName": "aer",
+    "baseName": "AER",
+    "brandName": "AER Browser",
+    "vendorName": "AER Project",
+    "updateChannel": "nightly",
+    "brandingDir": "branding/aer",
+    "mozconfig": "configs/windows/mozconfig"
+  }
+}

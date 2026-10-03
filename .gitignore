@@ -1,0 +1,24 @@
+# AER build artifacts
+engine/
+build/
+obj-*/
+firefox-cache/
+*.log
+*.pyc
+
+# Node
+node_modules/
+dist-ui/
+
+# Mozilla
+.mozbuild/
+sccache-stats/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp

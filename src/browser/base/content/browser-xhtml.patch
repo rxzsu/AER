@@ -1,0 +1,12 @@
+--- a/browser/base/content/browser.xhtml
++++ b/browser/base/content/browser.xhtml
+@@ -20,6 +20,11 @@
+   <link rel="stylesheet" href="chrome://browser/skin/browser.css"/>
++# AER: custom theme + startup hook. Держим ханк маленьким, чтобы легко ребейзить на новый ESR.
++  <link rel="stylesheet" href="chrome://aer/content/aer-theme.css"/>
++  <script src="chrome://aer/content/AerStartup.sys.mjs" type="module"></script>
+ </head>
+ <window id="main-window">
++# AER root marker for custom UI (vertical tabs / workspaces scaffold)
++  <vbox id="aer-main-app-wrapper" flex="1">
+   <hbox id="browser">

@@ -1,0 +1,90 @@
+name: windows-build
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AER_RELEASE: "1"
+  SCCACHE_GHA_ENABLED: "true"
+
+jobs:
+  # Быстрая проверка без 40GB движка: Bun + TS 7 + патчи
+  ui-check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Bun 1.4.2
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+      - name: Install deps
+        run: bun install --frozen-lockfile
+      - name: Typecheck (TS 7.0.2)
+        run: bunx tsc --noEmit
+      - name: UI check
+        run: bun run lint
+
+  # Полный билд Gecko — тяжёлый, кешируем engine/ и sccache
+  build-windows:
+    needs: ui-check
+    # Чтобы не жечь минуты на каждый push: полный билд только вручную или по тегу.
+    # Убери if, если хочешь собирать на каждый push.
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    # windows-2022 зафиксирован намеренно: там VS2022, под который заточен
+    # MozillaBuild + Firefox 157. windows-2025/latest уже на VS2026.
+    runs-on: windows-2022
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Bun 1.4.2
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14.8"
+
+      - name: Setup Rust (Firefox 157)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.10
+
+      - name: Install JS deps
+        run: bun install --frozen-lockfile
+
+      - name: Cache Firefox engine
+        uses: actions/cache@v5
+        with:
+          path: engine
+          key: firefox-157-${{ hashFiles('surfer.json', 'build/firefox-cache/l10n-last-commit-hash') }}
+          restore-keys: firefox-157-
+
+      - name: Download + import
+        run: bun run init
+        env:
+          MOZBUILD_PATH: "C:\\mozilla-build"
+
+      - name: Build
+        run: bun run build
+
+      - name: Package
+        run: bun run package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: aer-browser-windows
+          path: |
+            engine/obj-*/dist/install/**/*.zip
+            engine/obj-*/dist/*.zip
+          if-no-files-found: warn
